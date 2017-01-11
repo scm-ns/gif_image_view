@@ -10,14 +10,10 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    let imageView = UIImageView()
-    var images : [UIImage] = []
-    
-    
+ 
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         
             super.init(nibName: nil , bundle: nil)
-            addImages();
             setupViews();
         
     }
@@ -30,11 +26,6 @@ class ViewController: UIViewController {
     override func viewDidLoad()
     {
         super.viewDidLoad()
-        // Animate Image View
-        self.imageView.animationImages = self.images
-        self.imageView.animationDuration = 3
-        self.imageView.animationRepeatCount = 0 // infinite repeat
-        self.imageView.startAnimating()
     }
 
 
@@ -42,28 +33,7 @@ class ViewController: UIViewController {
     {
         self.view.backgroundColor = UIColor.white
         
-        self.imageView.translatesAutoresizingMaskIntoConstraints = false
-      
-        // View to hierachy + constraints
-        self.view.addSubview(self.imageView)
-        
-        self.view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0": self.imageView]))
-        
-        self.view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-50-[v0]-50-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0": self.imageView]))
-
     }
    
-    
-    func addImages()
-    {
-        for i in 0...31
-        {
-                let str = "snow_white\(i).png"
-                images.append(UIImage(named: str)!)
-        }
-    }
-    
-    
-    
 }
 
