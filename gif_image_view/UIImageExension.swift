@@ -66,37 +66,32 @@ extension UIImage
     
     class private func delayAtIndex(imageSource : CGImageSource , index : Int) ->Int?
     {
-        let properties : CFDictionary? = CGImageSourceCopyPropertiesAtIndex(imageSource, index, nil)
+        let properties : CFDictionary! = CGImageSourceCopyPropertiesAtIndex(imageSource, index, nil)
        
-        if let properties = properties
-        {
-            let gifPropertyKey : UnsafePointer<CFString> = unsafeBitCast(kCGImagePropertyGIFDictionary, to: UnsafePointer<CFString>.self)
-            //let gifPropertycfDictPointers : UnsafePointer<CFDictionary> = unsafeBitCast(CFDictionaryGetValue(properties , gifPropertyKey) , to : UnsafePointer<CFDictionary>.self)
+        let gifPropertyKey : UnsafeRawPointer! = unsafeBitCast(kCGImagePropertyGIFDictionary, to: UnsafeRawPointer.self)
            
-            // returns a ptr
-            let gifPropertyRawPtr : UnsafeRawPointer = CFDictionaryGetValue(properties, gifPropertyKey)!
+        // returns a ptr
+        let gifPropertyRawPtr : UnsafeRawPointer! = CFDictionaryGetValue(properties, gifPropertyKey)
           
-            // convert the ptr to UnSafePointer
-            let gifPropertyPtr : UnsafePointer<CFDictionary> = gifPropertyRawPtr.assumingMemoryBound(to: CFDictionary.self)
+        // convert the ptr to UnSafePointer
+        let gifPropertyPtr : UnsafePointer<CFDictionary> = gifPropertyRawPtr.assumingMemoryBound(to: CFDictionary.self)
 
-            // Get the type from the UnSafe Pointer
-            let gifProperty : CFDictionary = gifPropertyPtr.pointee as CFDictionary
+        // Get the type from the UnSafe Pointer
+        let gifProperty : CFDictionary! = gifPropertyPtr.pointee as? CFDictionary
           
-            var delayPropertyKey : UnsafePointer<CFString> = unsafeBitCast(kCGImagePropertyGIFUnclampedDelayTime, to: UnsafePointer<CFString>.self)
+        var delayPropertyKey : UnsafeRawPointer! = unsafeBitCast(kCGImagePropertyGIFUnclampedDelayTime, to: UnsafeRawPointer.self)
                 
-            //let delayNSNumbercfDictPointers : UnsafePointer<NSNumber> = unsafeBitCast(CFDictionaryGetValue(gifProperty , delayPropertyKey) , to : UnsafePointer<NSNumber>.self)
-           
-            var delayPropertyRawPtr :UnsafeRawPointer = CFDictionaryGetValue(gifProperty , delayPropertyKey)
-
-            var delayPropertyPtr : UnsafePointer<NSNumber> = delayPropertyRawPtr.assumingMemoryBound(to: NSNumber.self)
+        var delayPropertyRawPtr : UnsafeRawPointer! = CFDictionaryGetValue(gifProperty , delayPropertyKey)
+        
+        var delayPropertyPtr : UnsafePointer<NSNumber> = delayPropertyRawPtr.assumingMemoryBound(to: NSNumber.self)
  
-            var delayNSNumber : NSNumber? = delayPropertyPtr.pointee
+        var delayNSNumber : NSNumber? = delayPropertyPtr.pointee
         
             if delayNSNumber == nil || delayNSNumber?.doubleValue == 0
             {
                 // Obtain the value from a different feild in the dict
              
-                delayPropertyKey = unsafeBitCast(kCGImagePropertyGIFDelayTime, to: UnsafePointer<CFString>.self)
+                delayPropertyKey = unsafeBitCast(kCGImagePropertyGIFDelayTime, to: UnsafeRawPointer.self)
                 delayPropertyRawPtr = CFDictionaryGetValue(gifProperty , delayPropertyKey)
                 delayPropertyPtr = delayPropertyRawPtr.assumingMemoryBound(to: NSNumber.self)
                 delayNSNumber = delayPropertyPtr.pointee
@@ -114,8 +109,6 @@ extension UIImage
                 return 100;
             }
             
-        }
-        
         return nil;
     }
    
