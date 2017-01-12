@@ -29,9 +29,10 @@ class ViewController: UIViewController {
     {
         super.viewDidLoad()
         
-        
         // Animate Image Vie
-        self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://i.giphy.com/BtKpPw1u29TnW.gif")! as NSURL))
+       // self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://i.giphy.com/BtKpPw1u29TnW.gif")! as NSURL))
+        self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://i.giphy.com/gsYKROakiJQPu.gif")! as NSURL))
+        
     }
 
 
