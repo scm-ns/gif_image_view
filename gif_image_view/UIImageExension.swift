@@ -158,7 +158,7 @@ extension UIImage
                     UIImageArray.append(uiImage)
             }
         }
-        
+        print(UIImageArray.count)
         return UIImageArray
     }
     

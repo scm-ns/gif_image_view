@@ -31,7 +31,7 @@ class ViewController: UIViewController {
         
         // Animate Image Vie
        // self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://i.giphy.com/BtKpPw1u29TnW.gif")! as NSURL))
-        self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://i.giphy.com/gsYKROakiJQPu.gif")! as NSURL))
+        self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://1.images.comedycentral.com/images/tve/daily_show_trevor_noah/DailyShow_Trevor_BreakingNews2_408x408.gif")! as NSURL))
         
     }
 
@@ -51,8 +51,6 @@ class ViewController: UIViewController {
 
     }
    
-   
-    
     
 }
 
