@@ -77,40 +77,43 @@ extension UIImage
             let gifPropertyRawPtr : UnsafeRawPointer = CFDictionaryGetValue(properties, gifPropertyKey)!
           
             // convert the ptr to UnSafePointer
-            let gifPropertyPtr : UnsafePointer = gifPropertyRawPtr.assumingMemoryBound(to: CFDictionary.self)
+            let gifPropertyPtr : UnsafePointer<CFDictionary> = gifPropertyRawPtr.assumingMemoryBound(to: CFDictionary.self)
 
             // Get the type from the UnSafe Pointer
-            let gifProperty : CFDictionary = gifPropertyPtr.pointee
-            [
-                         var delayPropertyKey : UnsafePointer<CFString> = unsafeBitCast(kCGImagePropertyGIFUnclampedDelayTime, to: UnsafePointer<CFString>.self)
+            let gifProperty : CFDictionary = gifPropertyPtr.pointee as CFDictionary
+          
+            var delayPropertyKey : UnsafePointer<CFString> = unsafeBitCast(kCGImagePropertyGIFUnclampedDelayTime, to: UnsafePointer<CFString>.self)
                 
-            let delayNSNumbercfDictPointers : UnsafePointer<NSNumber> = unsafeBitCast(CFDictionaryGetValue(gifProperty , delayPropertyKey) , to : UnsafePointer<NSNumber>.self)
-                
-                var delayNSNumber : NSNumber? = delayNSNumbercfDictPointers.pointee
+            //let delayNSNumbercfDictPointers : UnsafePointer<NSNumber> = unsafeBitCast(CFDictionaryGetValue(gifProperty , delayPropertyKey) , to : UnsafePointer<NSNumber>.self)
+           
+            var delayPropertyRawPtr :UnsafeRawPointer = CFDictionaryGetValue(gifProperty , delayPropertyKey)
+
+            var delayPropertyPtr : UnsafePointer<NSNumber> = delayPropertyRawPtr.assumingMemoryBound(to: NSNumber.self)
+ 
+            var delayNSNumber : NSNumber? = delayPropertyPtr.pointee
+        
+            if delayNSNumber == nil || delayNSNumber?.doubleValue == 0
+            {
+                // Obtain the value from a different feild in the dict
              
-                guard let delay = delayNSNumber , delay.doubleValue == 0 else
-                {
-                    // Obtain the value from a different feild in the dict
-                 
-                    delayPropertyKey = unsafeBitCast(kCGImagePropertyGIFDelayTime, to: UnsafePointer<CFString>.self)
-                    
-                    let delayNSNumbercfDictPointers : UnsafePointer<NSNumber> = unsafeBitCast(CFDictionaryGetValue(gifProperty , delayPropertyKey) , to : UnsafePointer<NSNumber>.self)
-                    
-                    delayNSNumber = delayNSNumbercfDictPointers.pointee
-                    return 1;
-                }
+                delayPropertyKey = unsafeBitCast(kCGImagePropertyGIFDelayTime, to: UnsafePointer<CFString>.self)
+                delayPropertyRawPtr = CFDictionaryGetValue(gifProperty , delayPropertyKey)
+                delayPropertyPtr = delayPropertyRawPtr.assumingMemoryBound(to: NSNumber.self)
+                delayNSNumber = delayPropertyPtr.pointee
                 
-                // GIF format stores the data in centiseconds(0.01 seconds), which is needed for organizing the frames
-                // ImageIO converts it into seconds, but we need it in centiseconds for operating on it.
-                if let delayNSNumber = delayNSNumber
-                {
-                    return Int(Double(delayNSNumber.doubleValue) * Double(100.0) );
-                }
-                else
-                {
-                    return 1;
-                }
+            }
                 
+            // GIF format stores the data in centiseconds(0.01 seconds), which is needed for organizing the frames
+            // ImageIO converts it into seconds, but we need it in centiseconds for operating on it.
+            if let delayNSNumber = delayNSNumber
+            {
+                return Int(Double(delayNSNumber.doubleValue) * Double(100.0) );
+            }
+            else
+            {
+                return 100;
+            }
+            
         }
         
         return nil;
