@@ -10,7 +10,9 @@ import UIKit
 
 class ViewController: UIViewController {
 
- 
+    let imageView = UIImageView()
+    
+    
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         
             super.init(nibName: nil , bundle: nil)
@@ -26,6 +28,10 @@ class ViewController: UIViewController {
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        
+        
+        // Animate Image Vie
+        self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://i.giphy.com/BtKpPw1u29TnW.gif")! as NSURL))
     }
 
 
@@ -33,7 +39,19 @@ class ViewController: UIViewController {
     {
         self.view.backgroundColor = UIColor.white
         
+        self.imageView.translatesAutoresizingMaskIntoConstraints = false
+      
+        // View to hierachy + constraints
+        self.view.addSubview(self.imageView)
+        
+        self.view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0": self.imageView]))
+        
+        self.view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-50-[v0]-50-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0": self.imageView]))
+
     }
    
+   
+    
+    
 }
 
