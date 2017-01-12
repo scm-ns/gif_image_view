@@ -74,10 +74,11 @@ extension UIImage
         let gifPropertyRawPtr : UnsafeRawPointer! = CFDictionaryGetValue(properties, gifPropertyKey)
           
         // convert the ptr to UnSafePointer
-        let gifPropertyPtr : UnsafePointer<CFDictionary> = gifPropertyRawPtr.assumingMemoryBound(to: CFDictionary.self)
+        // The result should have been an CFDictionary, but an NSCFDictionary is being returned.
+        let gifPropertyPtr : UnsafePointer<NSDictionary> = gifPropertyRawPtr.assumingMemoryBound(to: NSDictionary.self)
 
         // Get the type from the UnSafe Pointer
-        let gifProperty : CFDictionary! = gifPropertyPtr.pointee as? CFDictionary
+        let gifProperty : NSDictionary! = gifPropertyPtr.pointee as NSDictionary
           
         var delayPropertyKey : UnsafeRawPointer! = unsafeBitCast(kCGImagePropertyGIFUnclampedDelayTime, to: UnsafeRawPointer.self)
                 
