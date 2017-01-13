@@ -10,7 +10,8 @@ import UIKit
 
 class MainViewController: UICollectionViewController
 {
-    static let cellId = "cell_1"
+    static let cellId = "gif_cell"
+    let dataSource : MainDataSource!
     convenience init()
     {
             let layout = UICollectionViewFlowLayout()
@@ -22,9 +23,11 @@ class MainViewController: UICollectionViewController
         super.init(collectionViewLayout: layout)
         setupViews()
         self.collectionView?.register(GifCell.self, forCellWithReuseIdentifier:MainViewController.cellId)
+        self.dataSource = MainDataSource()
+        self.collectionView?.dataSource = self.dataSource
+        self.collectionView?.delegate =  self.dataSource
     }
    
-    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -43,35 +46,39 @@ class MainViewController: UICollectionViewController
     func setupViews()
     {
         self.view.backgroundColor = UIColor.green
-      
     }
    
 }
 
-class MainDataSource : UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
+class MainDataSource : NSObject, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 {
-   
+    // How to decide on number of Cells to display
+    var dataSources : [GifCellDataSource] = [GifCellDataSource() , GifCellDataSource() , GifCellDataSource()]
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MainViewController.cellId , for: indexPath) as! GifCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MainViewController.cellId, for: indexPath)
+        
             return cell
     }
     
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1;
+    }
     
-
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return  dataSources.count
+    }
+    
+    
 }
-
-}
-
-}
-
-}
-
 
 /// Shown inside the Main Collection View
 /// Holds another Collection view inside it
 class GifCell : UICollectionViewCell
 {
+    static let cellId = "gif_sub_cell"
+    let dataSource : GifCellDataSource!
     let collectionView =
     { () -> UICollectionView in
             let colView = UICollectionView()
@@ -80,22 +87,65 @@ class GifCell : UICollectionViewCell
     
     override init(frame: CGRect)
     {
+            self.dataSource = nil
             super.init(frame : frame)
             self.setupViews()
+            self.collectionView.register(GifSubCell.self, forCellWithReuseIdentifier: GifCell.cellId)
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+   
+    func setDataSourceAndDelegate(dataSource : GifCellDataSource)
+    {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     func setupViews()
     {
         self.addSubview(collectionView)
+        self.collectionView.backgroundColor = UIColor.red
         self.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0":collectionView]))
         self.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0":collectionView]))
     }
     
 }
+
+
+class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionViewDelegateFlowLayout
+{
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 5
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+    }
+}
+
+
 
 /// Holds the GIF : Shown inside the GifCell 
 class GifSubCell : UICollectionViewCell
