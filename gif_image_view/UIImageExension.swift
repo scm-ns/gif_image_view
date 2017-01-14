@@ -18,10 +18,9 @@ extension UIImage
     ///
     /// - Parameter url: url pointing to the gif
     /// - Returns: Animated UIImage
-    class func animatedImageWithGIFURL(url:NSURL) -> UIImage
+    class func animatedImageWithGIFURL(string : String) -> UIImage
     {
-        let imageSource : CGImageSource = CGImageSourceCreateWithURL(url, nil)!
-       
+        let imageSource : CGImageSource = CGImageSourceCreateWithURL(URL(string: string) as! CFURL, nil)!
         
         let cgImageArray : [CGImage] = CGImageArray(imageSource: imageSource)
         

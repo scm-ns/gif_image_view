@@ -10,7 +10,6 @@ import UIKit
 
 class MainViewController: UICollectionViewController
 {
-    static let cellId = "gif_cell"
     let dataSource : MainDataSource!
     convenience init()
     {
@@ -20,10 +19,10 @@ class MainViewController: UICollectionViewController
     
     override init(collectionViewLayout layout: UICollectionViewLayout)
     {
+        self.dataSource = MainDataSource()
         super.init(collectionViewLayout: layout)
         setupViews()
-        self.collectionView?.register(GifCell.self, forCellWithReuseIdentifier:MainViewController.cellId)
-        self.dataSource = MainDataSource()
+        self.collectionView?.register(GifCell.self, forCellWithReuseIdentifier:GifCell.cellId)
         self.collectionView?.dataSource = self.dataSource
         self.collectionView?.delegate =  self.dataSource
     }
@@ -36,16 +35,11 @@ class MainViewController: UICollectionViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
-        
-        // Animate Image Vie
-       // self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://i.giphy.com/BtKpPw1u29TnW.gif")! as NSURL))
-        //self.imageView.image = UIImage.animatedImageWithGIFURL(url:(URL(string:"http://1.images.comedycentral.com/images/tve/daily_show_trevor_noah/DailyShow_Trevor_BreakingNews2_408x408.gif")! as NSURL))
-        
     }
 
     func setupViews()
     {
-        self.view.backgroundColor = UIColor.green
+        self.collectionView?.backgroundColor = UIColor.green
     }
    
 }
@@ -53,12 +47,12 @@ class MainViewController: UICollectionViewController
 class MainDataSource : NSObject, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 {
     // How to decide on number of Cells to display
-    var dataSources : [GifCellDataSource] = [GifCellDataSource() , GifCellDataSource() , GifCellDataSource()]
+    var composedDataSources : [GifCellDataSource] = [GifCellDataSource() , GifCellDataSource() , GifCellDataSource()]
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MainViewController.cellId, for: indexPath)
-        
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GifCell.cellId, for: indexPath) as! GifCell
+            cell.setDataSourceAndDelegate(dataSource: composedDataSources[indexPath.row])
             return cell
     }
     
@@ -67,21 +61,27 @@ class MainDataSource : NSObject, UICollectionViewDataSource, UICollectionViewDel
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return  dataSources.count
+        return  composedDataSources.count
     }
     
-    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: 250)
+    }
 }
 
 /// Shown inside the Main Collection View
 /// Holds another Collection view inside it
 class GifCell : UICollectionViewCell
 {
-    static let cellId = "gif_sub_cell"
-    let dataSource : GifCellDataSource!
-    let collectionView =
-    { () -> UICollectionView in
-            let colView = UICollectionView()
+    static let cellId = "gif_cell"
+    var dataSource : GifCellDataSource!
+    lazy var collectionView : UICollectionView = {
+        [unowned self]  in
+            let layout = UICollectionViewFlowLayout()
+            layout.scrollDirection = .horizontal
+            //let colFrame =  CGRect(x: self.frame.origin.x, y: self.frame.origin.y , width: self.frame.width - 20, height: self.frame.height - 50)
+            // CGSize(width: self.frame.width - 20, height: self.frame.height - 50 )
+            let colView = UICollectionView(frame: self.bounds, collectionViewLayout: layout)
             return colView
     }()
     
@@ -90,43 +90,28 @@ class GifCell : UICollectionViewCell
             self.dataSource = nil
             super.init(frame : frame)
             self.setupViews()
-            self.collectionView.register(GifSubCell.self, forCellWithReuseIdentifier: GifCell.cellId)
+            self.collectionView.register(GifSubCell.self, forCellWithReuseIdentifier: GifSubCell.cellId)
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-   
+  
+    // To be set up when the cell is dequed to be displayed
     func setDataSourceAndDelegate(dataSource : GifCellDataSource)
     {
+        self.dataSource = dataSource
+        self.collectionView.dataSource = self.dataSource
+        self.collectionView.delegate = self.dataSource
+        self.collectionView.reloadData()
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    func setupViews()
+    private func setupViews()
     {
         self.addSubview(collectionView)
+        self.collectionView.translatesAutoresizingMaskIntoConstraints = false
         self.collectionView.backgroundColor = UIColor.red
+        self.collectionView.alwaysBounceHorizontal = true
         self.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0":collectionView]))
         self.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0":collectionView]))
     }
@@ -136,21 +121,45 @@ class GifCell : UICollectionViewCell
 
 class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionViewDelegateFlowLayout
 {
+    var URLStringArray : [String] = []
+    
+    override init()
+    {
+       super.init()
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/daily_show_trevor_noah/DailyShow_Trevor_BreakingNews2_408x408.gif")
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/daily_show_trevor_noah/DailyShow_Trevor_IDontThinkSo_408x408.gif")
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/daily_show_trevor_noah/DailyShow_Trevor_WaitFinger_Animated_408x408.gif")
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/daily_show_trevor_noah/DailyShow_Trevor_Wrong_Animated_408x408.gif")
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/at_midnight/AtMidnight_ChrisHardwick_Points_408x408.gif")
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/daily_show_trevor_noah/DailyShow_Trevor_Wrong_Animated_408x408.gif")
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/at_midnight/AtMidnight_ChrisHardwick_Points_408x408.gif")
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/south_park/SouthPark_Cartman_ScrewYouGuys_408x408.gif")
+        URLStringArray.append("http://1.images.comedycentral.com/images/tve/another_period/AnotherPeriod_Beatrice_Finally_Animated_408x408.gif")
+    }
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 5
+        return URLStringArray.count
     }
 
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+    {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GifSubCell.cellId, for: indexPath) as! GifSubCell
+            cell.setImage(imageURL: URLStringArray[indexPath.row])
+            return cell
     }
-}
-
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 150, height: 150)
+    }
+    
+    
+} 
 
 
 /// Holds the GIF : Shown inside the GifCell 
 class GifSubCell : UICollectionViewCell
 {
-    let imageView : UIImageView = {
+    static let cellId = "gif_sub_cell"
+    private let imageView : UIImageView = {
         let vi = UIImageView()
         vi.tintColor = UIColor.red
         return vi
@@ -165,9 +174,16 @@ class GifSubCell : UICollectionViewCell
         fatalError("init(coder:) has not been implemented")
     }
    
-    func setupViews()
+    func setImage(imageURL : String)
     {
+        imageView.image = UIImage.animatedImageWithGIFURL(string:  imageURL)
+    }
+    
+    private func setupViews()
+    {
+        self.imageView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(imageView)
+        self.imageView.contentMode = .scaleToFill
         self.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0":imageView]))
         self.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0":imageView]))
     }
