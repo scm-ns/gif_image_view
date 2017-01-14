@@ -122,6 +122,7 @@ class GifCell : UICollectionViewCell
 class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionViewDelegateFlowLayout
 {
     var URLStringArray : [String] = []
+    var cache = NSCache<AnyObject, UIImage>()
     
     override init()
     {
@@ -143,7 +144,21 @@ class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionVie
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GifSubCell.cellId, for: indexPath) as! GifSubCell
-            cell.setImage(imageURL: URLStringArray[indexPath.row])
+            //let image = UIImage.animatedImageWithGIFURL(string: URLStringArray[indexPath.row])
+        
+            let image = cache.object(forKey: URLStringArray[indexPath.row] as AnyObject)
+            if let image = image
+            {
+                    cell.setImage(image: image)
+            }
+            else
+            {
+                    let requestedImage = UIImage.animatedImageWithGIFURL(string: URLStringArray[indexPath.row])
+                    cell.setImage(image: requestedImage)
+                    cache.setObject(requestedImage, forKey: URLStringArray[indexPath.row] as AnyObject)
+            }
+        
+        
             return cell
     }
     
@@ -174,9 +189,9 @@ class GifSubCell : UICollectionViewCell
         fatalError("init(coder:) has not been implemented")
     }
    
-    func setImage(imageURL : String)
+    func setImage(image : UIImage)
     {
-        imageView.image = UIImage.animatedImageWithGIFURL(string:  imageURL)
+        imageView.image = image
     }
     
     private func setupViews()
