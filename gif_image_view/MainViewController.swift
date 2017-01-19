@@ -155,14 +155,12 @@ class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionVie
             }
             else
             {
-                    // Blocking part of the code.. Move it to a background thread. 
                     UIImage.animatedImageWithGIFURL(string: URLStringArray[indexPath.row])
                     { 
                         cell.setImage(image: $0)
                         self.cache.setObject($0 , forKey: self.URLStringArray[indexPath.row] as AnyObject)
                     }
             }
-        
         
             return cell
     }
@@ -176,7 +174,7 @@ class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionVie
 
 
 /// Holds the GIF : Shown inside the GifCell 
-class GifSubCell : UICollectionViewCell
+class GifSubCell : BaseCell
 {
     static let cellId = "gif_sub_cell"
     private let imageView : UIImageView = {
@@ -188,22 +186,13 @@ class GifSubCell : UICollectionViewCell
     override func prepareForReuse() {
         self.imageView.image = nil
     }
-    
-    override init(frame: CGRect) {
-        super.init(frame : frame)
-        self.setupViews()
-    }
-   
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
    
     func setImage(image : UIImage)
     {
         imageView.image = image
     }
     
-    private func setupViews()
+    override func setupViews()
     {
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(imageView)
@@ -214,3 +203,21 @@ class GifSubCell : UICollectionViewCell
 
 }
 
+
+class BaseCell : UICollectionViewCell
+{
+    override init(frame: CGRect) {
+        super.init(frame : frame)
+        self.setupViews()
+    }
+   
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+   
+    
+    func setupViews()
+    {
+        
+    }
+}
