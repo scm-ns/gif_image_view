@@ -47,7 +47,8 @@ class MainViewController: UICollectionViewController
 class MainDataSource : NSObject, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 {
     // How to decide on number of Cells to display
-    var composedDataSources : [GifCellDataSource] = [GifCellDataSource() , GifCellDataSource() , GifCellDataSource()]
+    var composedDataSources : [GifCellDataSource] = [GifCellDataSource() , GifCellDataSource() , GifCellDataSource() ,
+                                                     GifCellDataSource() , GifCellDataSource() , GifCellDataSource()]
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
@@ -65,7 +66,7 @@ class MainDataSource : NSObject, UICollectionViewDataSource, UICollectionViewDel
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.width, height: 250)
+        return CGSize(width: collectionView.frame.width, height: CGFloat(indexPath.row * 100) )
     }
 }
 
@@ -149,6 +150,7 @@ class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionVie
             let image = cache.object(forKey: URLStringArray[indexPath.row] as AnyObject)
             if let image = image
             {
+                    print("using cached image")
                     cell.setImage(image: image)
             }
             else
@@ -163,7 +165,7 @@ class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionVie
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 150, height: 150)
+        return CGSize(width: collectionView.frame.height , height: collectionView.frame.height )
     }
     
     
@@ -179,6 +181,10 @@ class GifSubCell : UICollectionViewCell
         vi.tintColor = UIColor.red
         return vi
     }()
+   
+    override func prepareForReuse() {
+        self.imageView.image = nil
+    }
     
     override init(frame: CGRect) {
         super.init(frame : frame)
@@ -202,5 +208,6 @@ class GifSubCell : UICollectionViewCell
         self.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0":imageView]))
         self.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[v0]-8-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0":imageView]))
     }
+
 }
 
