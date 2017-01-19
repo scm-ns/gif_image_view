@@ -123,7 +123,6 @@ class GifCell : UICollectionViewCell
 class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionViewDelegateFlowLayout
 {
     var URLStringArray : [String] = []
-    var cache = NSCache<AnyObject, UIImage>()
     
     override init()
     {
@@ -146,21 +145,7 @@ class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionVie
     {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GifSubCell.cellId, for: indexPath) as! GifSubCell
             //let image = UIImage.animatedImageWithGIFURL(string: URLStringArray[indexPath.row])
-        
-            let image = cache.object(forKey: URLStringArray[indexPath.row] as AnyObject)
-            if let image = image
-            {
-                    print("using cached image")
-                    cell.setImage(image: image)
-            }
-            else
-            {
-                    UIImage.animatedImageWithGIFURL(string: URLStringArray[indexPath.row])
-                    { 
-                        cell.setImage(image: $0)
-                        self.cache.setObject($0 , forKey: self.URLStringArray[indexPath.row] as AnyObject)
-                    }
-            }
+            cell.setImage(gifURLStr: URLStringArray[indexPath.row])
         
             return cell
     }
@@ -177,8 +162,8 @@ class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionVie
 class GifSubCell : BaseCell
 {
     static let cellId = "gif_sub_cell"
-    private let imageView : UIImageView = {
-        let vi = UIImageView()
+    private let imageView : FLAnimatedImageView = {
+        let vi = FLAnimatedImageView()
         vi.tintColor = UIColor.red
         return vi
     }()
@@ -186,10 +171,19 @@ class GifSubCell : BaseCell
     override func prepareForReuse() {
         self.imageView.image = nil
     }
-   
-    func setImage(image : UIImage)
+  
+    func setImage(gifURLStr : String)
     {
-        imageView.image = image
+        let url = NSURL(string: gifURLStr)
+        
+        DispatchQueue.global(qos: .utility).async
+        {
+            let image: FLAnimatedImage = FLAnimatedImage(animatedGIFData: NSData(contentsOf: url as! URL) as Data!)
+            DispatchQueue.main.async
+            {
+                    self.imageView.animatedImage = image
+            }
+        }
     }
     
     override func setupViews()
