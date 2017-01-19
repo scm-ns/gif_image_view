@@ -10,31 +10,57 @@ import ImageIO
 
 extension UIImage
 {
-    /// Returns an Animated UIImage with GIF at the given URL. Set it as UIImageView.image to see the GIF
     ///
+    /// Returns an Animated UIImage with GIF at the given URL. Set it as UIImageView.image to see the GIF
+    /// Gets an Animated UIImage from the (animated) GIF at the given URL. Accepts a completion handler where the image is passed.
+    /// Set the image as UIImageView.image within the completion handler to see the GIF. 
+    /// Heavy Lifting done on a utility queue, but the completion executed on the main thread
+    /// 
     /// Details :
     ///  UIImage has property images which is an array of images. This array is filled using a convenice method
     ///  This sequence of images is iterated through by the ImageView giving the apperance of a GIF
-    ///
+    ///  Move Everything into the background thread.
+    ///  Add a completion block that will give the image to the completion block and the user can choose to use the image.
+    /// 
     /// - Parameter url: url pointing to the gif
-    /// - Returns: Animated UIImage
-    class func animatedImageWithGIFURL(string : String) -> UIImage
+    /// - Completion Handler : Used to update the image. Run on the Main Thread
+    class func animatedImageWithGIFURL(string : String , completion : @escaping (UIImage!) -> Void ) // no argument label for closure in swift 3
     {
-        let imageSource : CGImageSource = CGImageSourceCreateWithURL(URL(string: string) as! CFURL, nil)!
         
-        let cgImageArray : [CGImage] = CGImageArray(imageSource: imageSource)
-        
-        let delayArray : [Int] = DelayArray(imageSource: imageSource)
-   
-        print(delayArray)
-
-        let duration = delayArray.reduce(0 , +)
-        
-        let uiImageArray : [UIImage] = UIImageFrames(CGImageArray: cgImageArray , DelayArray: delayArray , duration: Double(duration))
+        DispatchQueue.global(qos : .utility).async
+        {
+            // Get the ImageSource for a network request (synchronously)
+            let imageSource : CGImageSource = CGImageSourceCreateWithURL(URL(string: string) as! CFURL, nil)!
+            
+            // Get the images in the gif from the image source and convert them into CGImage ArrayLw
+            let cgImageArray : [CGImage] = CGImageArray(imageSource: imageSource)
+            
+            // get the delay associated with the gif from the image source
+            // Each delay value correspods to the number of time steps that a particular image should be shown for
+            // The duration can be variable according to gif standard. [ie some images shown longer than others]
+            let delayArray : [Int] = DelayArray(imageSource: imageSource)
        
-        let uiImage = UIImage.animatedImage(with: uiImageArray, duration: TimeInterval(duration/100))
-        
-        return uiImage!
+            print(delayArray)
+            
+            // Sum up the total duration of the gif 
+            // Uses the Operator Methods Closure
+            let duration = delayArray.reduce(0 , +)
+
+            // Get an array of images where based on the delay for each frame, the frame is repeated in the array. 
+            // So an image with a delay lasting 5 time steps will be repeated (copied) in the array 5 times
+            let uiImageArray : [UIImage] = UIImageFrames(CGImageArray: cgImageArray , DelayArray: delayArray , duration: Double(duration))
+          
+            // UIImage has a property for holding an array of images, which can be animated.
+            let uiImage = UIImage.animatedImage(with: uiImageArray, duration: TimeInterval(duration/100))
+            // Not a single image but an array of image lives in a single UIImage instance here.
+    
+            DispatchQueue.main.async
+            {
+                completion(uiImage)
+            }
+            
+        }
+       
     }
    
     // Extract the images from the imageSource and store it in an array
@@ -136,7 +162,7 @@ extension UIImage
     ///     step
     ///
     /// - Parameters:
-    ///   - CGImageArray: <#CGImageArray description#>
+    ///   - CGImageArray: 
     ///   - DelayArray: <#DelayArray description#>
     ///   - duration: <#duration description#>
     /// - Returns: <#return value description#>
