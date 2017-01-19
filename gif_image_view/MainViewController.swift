@@ -155,9 +155,12 @@ class GifCellDataSource : NSObject, UICollectionViewDataSource , UICollectionVie
             }
             else
             {
-                    let requestedImage = UIImage.animatedImageWithGIFURL(string: URLStringArray[indexPath.row])
-                    cell.setImage(image: requestedImage)
-                    cache.setObject(requestedImage, forKey: URLStringArray[indexPath.row] as AnyObject)
+                    // Blocking part of the code.. Move it to a background thread. 
+                    UIImage.animatedImageWithGIFURL(string: URLStringArray[indexPath.row])
+                    { 
+                        cell.setImage(image: $0)
+                        self.cache.setObject($0 , forKey: self.URLStringArray[indexPath.row] as AnyObject)
+                    }
             }
         
         
